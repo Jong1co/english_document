@@ -39,6 +39,12 @@ export async function updateSession(request: NextRequest) {
   const isSignedIn = Boolean(data?.claims)
   const isAuthPath = AUTH_PATHS.includes(request.nextUrl.pathname)
 
+  // Server Action POSTs can't follow an HTML redirect. Let them through: every action
+  // re-checks the session via the DAL and redirects in a way the client understands.
+  if (request.headers.has('next-action')) {
+    return supabaseResponse
+  }
+
   if (!isSignedIn && !isAuthPath) {
     return redirectKeepingCookies(request, supabaseResponse, '/login')
   }
