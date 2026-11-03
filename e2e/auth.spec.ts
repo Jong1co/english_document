@@ -1,4 +1,5 @@
 import { expect, test } from '@playwright/test'
+import { createAdminClient } from './admin-client'
 import { login, TEST_PASSWORD, TEST_USERS } from './helpers'
 
 test('비로그인 사용자는 /sentences에서 /login으로 이동', async ({ page }) => {
@@ -37,5 +38,24 @@ test('가입하면 /pending으로 이동', async ({ page }) => {
   await page.getByLabel('이메일').fill(`signup-${Date.now()}@test.local`)
   await page.getByLabel('비밀번호').fill(TEST_PASSWORD)
   await page.getByRole('button', { name: '가입하기' }).click()
+  await expect(page).toHaveURL(/\/pending$/)
+})
+
+test('프로필이 없는 계정은 승인 대기 화면으로', async ({ page }) => {
+  // e.g. an auth user created on the hosted project before the profiles migration
+  const admin = createAdminClient()
+  const email = `noprofile-${Date.now()}@test.local`
+  const { data, error } = await admin.auth.admin.createUser({ email, password: TEST_PASSWORD, email_confirm: true })
+  if (error) throw error
+  const { error: deleteError } = await admin.from('profiles').delete().eq('id', data.user.id)
+  if (deleteError) throw deleteError
+
+  await page.goto('/login')
+  await page.getByLabel('이메일').fill(email)
+  await page.getByLabel('비밀번호').fill(TEST_PASSWORD)
+  await page.getByRole('button', { name: '로그인' }).click()
+  await expect(page.getByRole('heading', { name: '관리자 승인 대기 중' })).toBeVisible()
+  await expect(page.getByText(email)).toBeVisible()
+  await page.goto('/sentences')
   await expect(page).toHaveURL(/\/pending$/)
 })

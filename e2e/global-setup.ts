@@ -1,13 +1,11 @@
-import { createClient } from '@supabase/supabase-js'
-import type { Database } from '../lib/supabase/database.types'
-import { getLocalSupabaseEnv } from './local-env'
+import { createAdminClient } from './admin-client'
 import { TEST_PASSWORD, TEST_USERS, type TestRole } from './helpers'
 
+/** Users created by individual tests; removed at the start of every run. */
+const THROWAWAY_PREFIXES = ['signup-', 'noprofile-']
+
 export default async function globalSetup() {
-  const { url, secretKey } = getLocalSupabaseEnv()
-  const admin = createClient<Database>(url, secretKey, {
-    auth: { persistSession: false, autoRefreshToken: false },
-  })
+  const admin = createAdminClient()
 
   await check(admin.from('sentences').delete().not('id', 'is', null))
   await check(admin.from('sources').delete().not('id', 'is', null))
@@ -16,7 +14,8 @@ export default async function globalSetup() {
   if (error) throw error
 
   for (const user of data.users) {
-    if (user.email?.startsWith('signup-') && user.email.endsWith('@test.local')) {
+    const isThrowaway = THROWAWAY_PREFIXES.some((prefix) => user.email?.startsWith(prefix))
+    if (isThrowaway && user.email?.endsWith('@test.local')) {
       const { error: deleteError } = await admin.auth.admin.deleteUser(user.id)
       if (deleteError) throw deleteError
     }

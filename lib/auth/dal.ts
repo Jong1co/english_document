@@ -18,16 +18,20 @@ export const getCurrentUser = cache(async (): Promise<CurrentUser | null> => {
   await connection()
   const supabase = await createClient()
   const { data: claimsData } = await supabase.auth.getClaims()
-  const userId = claimsData?.claims?.sub
+  const claims = claimsData?.claims
+  const userId = claims?.sub
   if (!userId) return null
 
-  const { data: profile } = await supabase
+  const { data: profile, error } = await supabase
     .from('profiles')
     .select('id, email, name, role')
     .eq('id', userId)
     .maybeSingle()
+  if (error) throw error
 
-  return profile ?? null
+  // Signed in but no profile row (e.g. created before the profiles migration): no role yet.
+  // Returning null here would send them to /login, which the proxy bounces back — a redirect loop.
+  return profile ?? { id: userId, email: claims.email ?? '', name: null, role: 'pending' }
 })
 
 export async function requireSentenceManager(): Promise<CurrentUser> {

@@ -49,6 +49,13 @@ end $$;
 create trigger on_auth_user_created after insert on auth.users
   for each row execute function public.handle_new_user();
 
+-- Users that existed before this migration (e.g. on a hosted project) get a profile too.
+insert into public.profiles (id, email, name)
+select id, email, nullif(btrim(raw_user_meta_data ->> 'name'), '')
+from auth.users
+where email is not null
+on conflict (id) do nothing;
+
 create function public.app_role() returns public.user_role
   language sql stable security definer set search_path = '' as $$
   select role from public.profiles where id = auth.uid()
