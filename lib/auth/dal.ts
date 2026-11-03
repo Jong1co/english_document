@@ -1,6 +1,7 @@
 import 'server-only'
 import { cache } from 'react'
 import { redirect } from 'next/navigation'
+import { connection } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
 import { canManageMembers, canManageSentences, type Role } from './roles'
 
@@ -12,6 +13,9 @@ export type CurrentUser = {
 }
 
 export const getCurrentUser = cache(async (): Promise<CurrentUser | null> => {
+  // Supabase checks token expiry with Date.now(); keep this out of any prerender,
+  // including cookie-aware runtime prefetches (partialPrefetching).
+  await connection()
   const supabase = await createClient()
   const { data: claimsData } = await supabase.auth.getClaims()
   const userId = claimsData?.claims?.sub
