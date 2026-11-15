@@ -19,7 +19,9 @@
       }
     ],
     "paths": {
-      "@/*": ["./*"]
+      "@/*": ["./src/*"],
+      "@server": ["./server/index.ts"],
+      "@contracts/*": ["./contracts/*"]
     }
   },
   "include": [

@@ -45,3 +45,6 @@ next-env.d.ts
 # playwright
 /test-results/
 /playwright-report/
+
+# worktrees (docs/conventions/git-workflow.md)
+/.claude/worktrees/
