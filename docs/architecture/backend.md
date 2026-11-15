@@ -45,7 +45,15 @@ views/         V: DB 행 → 응답 DTO (snake_case → camelCase). 응답 모�
 
 ## API
 
-모든 경로는 `/api` 아래. 요청·응답 본문은 JSON. 타입은 `contracts/`에 있다.
+모든 경로는 `/api/v1` 아래 (아래 표는 접두사 생략). 요청·응답 본문은 JSON. 타입은 `contracts/`에 있다.
+
+### 버전
+
+- 접두사는 `contracts/common.ts`의 `API_PREFIX`(`/api/v1`) 하나뿐이다. BE 라우트(`routes.ts`)와 FE 호출(`src/shared/api/client.ts`, `proxy.ts`)이 모두 이 값을 쓴다.
+- **같은 버전 안에서 해도 되는 변경**: 새 엔드포인트, 응답 필드 추가, 선택 입력 필드 추가.
+- **새 버전(`/api/v2`)이 필요한 변경**: 필드 삭제·이름 변경·타입 변경, 필수 입력 추가, 에러 코드 의미 변경, 경로 변경.
+- 새 버전을 낼 때는 이전 버전 라우트를 남겨 두고, 이 앱(FE)을 옮긴 뒤 다른 클라이언트가 없을 때 지운다.
+- 접두사 없는 `/api/...`와 존재하지 않는 버전은 `404 NOT_FOUND`.
 
 | 메서드 | 경로 | 권한 | 성공 응답 | 계약 |
 |---|---|---|---|---|
@@ -102,5 +110,5 @@ DB 컬럼 이름은 계약에 나오지 않는다. DB를 바꿔도 view만 고�
 3. `services/<도메인>.service.ts`에 규칙
 4. `views/<도메인>.view.ts`에 DTO 변환
 5. `controllers/<도메인>.controller.ts`에 액션
-6. `routes.ts`에 한 줄 + 이 문서의 API 표 갱신
+6. `routes.ts`에 한 줄 (`v1('/경로')`) + 이 문서의 API 표 갱신. 기존 응답을 깨는 변경이면 [버전](#버전) 규칙을 따른다
 7. 순수 로직은 단위 테스트, 권한은 `supabase/tests/database/`에 pgTAP 테스트

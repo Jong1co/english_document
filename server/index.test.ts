@@ -10,9 +10,14 @@ describe('handleApiRequest', () => {
   })
 
   it('answers a known path with the wrong method with 405', async () => {
-    const response = await handleApiRequest(new Request('http://backend.internal/api/sources', { method: 'DELETE' }))
+    const response = await handleApiRequest(new Request('http://backend.internal/api/v1/sources', { method: 'DELETE' }))
     expect(response.status).toBe(405)
     expect((await response.json()).error.code).toBe('METHOD_NOT_ALLOWED')
+  })
+
+  it('serves routes only under the version prefix', async () => {
+    const response = await handleApiRequest(new Request('http://backend.internal/api/sources', { method: 'DELETE' }))
+    expect(response.status).toBe(404)
   })
 })
 

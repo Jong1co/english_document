@@ -5,6 +5,12 @@ import { z } from 'zod'
  * 이 폴더는 zod 외의 어떤 런타임에도 의존하지 않는다 (Next, React, Supabase 금지).
  */
 
+/**
+ * 모든 API 경로의 접두사. 호환이 깨지는 변경은 새 버전(/api/v2)으로 낸다.
+ * 같은 버전 안에서는 응답 필드 추가처럼 기존 클라이언트를 깨지 않는 변경만 한다.
+ */
+export const API_PREFIX = '/api/v1'
+
 export const ERROR_CODES = [
   'BAD_REQUEST',
   'VALIDATION_FAILED',

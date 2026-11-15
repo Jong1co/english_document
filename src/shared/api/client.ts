@@ -1,7 +1,7 @@
 import 'server-only'
 import { cookies } from 'next/headers'
 import { connection } from 'next/server'
-import type { ApiErrorBody } from '@contracts/common'
+import { API_PREFIX, type ApiErrorBody } from '@contracts/common'
 import { fetchBackend } from './backend'
 import { readSetCookies, toCookieHeader } from './set-cookie'
 
@@ -22,7 +22,7 @@ const UNKNOWN_ERROR: ApiError = { code: 'INTERNAL', message: '요청을 처리�
  * Calls the BE from a Server Component or Server Action.
  *
  * The current request's cookies go along, and cookies the BE sets (sign-in, sign-out,
- * token refresh) are passed on to the browser. `path` is relative to `/api`.
+ * token refresh) are passed on to the browser. `path` is relative to API_PREFIX (`/api/v1`).
  */
 export async function apiRequest<T>(
   method: Method,
@@ -41,7 +41,7 @@ export async function apiRequest<T>(
   const headers = new Headers({ cookie: toCookieHeader(cookieStore.getAll()) })
   if (body !== undefined) headers.set('content-type', 'application/json')
 
-  const response = await fetchBackend(`/api${path}${search.size > 0 ? `?${search}` : ''}`, {
+  const response = await fetchBackend(`${API_PREFIX}${path}${search.size > 0 ? `?${search}` : ''}`, {
     method,
     headers,
     body: body === undefined ? undefined : JSON.stringify(body),

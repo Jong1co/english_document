@@ -1,5 +1,6 @@
 import { NextResponse, type NextRequest } from 'next/server'
 import type { SessionResponse } from '@contracts/auth'
+import { API_PREFIX } from '@contracts/common'
 import { fetchBackend } from '@/shared/api/backend'
 import { readSetCookies } from '@/shared/api/set-cookie'
 import { ROUTES } from '@/shared/config/routes'
@@ -8,7 +9,7 @@ const AUTH_PATHS: string[] = [ROUTES.login, ROUTES.signup]
 
 /** Refreshes the session cookie on every page request and keeps signed-out users on the auth pages. */
 export async function proxy(request: NextRequest) {
-  const backend = await fetchBackend('/api/auth/session', {
+  const backend = await fetchBackend(`${API_PREFIX}/auth/session`, {
     headers: { cookie: request.headers.get('cookie') ?? '' },
   })
   const { signedIn } = backend.ok ? ((await backend.json()) as SessionResponse) : { signedIn: false }

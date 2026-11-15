@@ -15,7 +15,7 @@
 │   │   ├── sentences/…          → @/views/sentences, sentence-new, sentence-edit
 │   │   └── members/page.tsx     → @/views/members
 │   ├── pending/page.tsx         → @/views/pending
-│   └── api/[...path]/route.ts   BE를 /api/* 에 마운트 (→ @server)
+│   └── api/[...path]/route.ts   BE를 /api/* 에 마운트 (→ @server). 버전(/api/v1)은 BE 라우터가 처리
 │
 ├── proxy.ts                     세션 갱신 + 비로그인 리다이렉트 (Next 16의 middleware)
 │

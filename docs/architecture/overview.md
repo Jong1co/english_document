@@ -38,7 +38,7 @@ FE는 BE를 **HTTP 형태(Request/Response)로만** 호출한다. 지금은 같�
 [브라우저]
    │ 페이지 요청 / Server Action(POST)
    ▼
-proxy.ts ───────────── GET /api/auth/session ──┐  세션 쿠키 갱신, 비로그인 리다이렉트
+proxy.ts ─────────── GET /api/v1/auth/session ─┐  세션 쿠키 갱신, 비로그인 리다이렉트
    ▼                                           │
 Server Component / Server Action (src/)        │
    │ apiRequest('GET', '/sentences')           │
@@ -49,12 +49,13 @@ src/shared/api/client.ts ─▶ backend.ts ─▶ server/index.ts (handleApiRequ
                                              ▼
                                    view(DTO) → JSON Response (+ Set-Cookie)
 
-[외부 HTTP 클라이언트] ─▶ /api/* ─▶ app/api/[...path]/route.ts ─▶ server/index.ts (같은 함수)
+[외부 HTTP 클라이언트] ─▶ /api/v1/* ─▶ app/api/[...path]/route.ts ─▶ server/index.ts (같은 함수)
 ```
 
 - 쿠키: `client.ts`가 현재 요청의 쿠키를 BE 요청에 싣고, BE가 내려준 `Set-Cookie`(로그인·로그아웃·토큰 갱신)를 브라우저로 넘긴다.
 - 권한: FE의 가드(`requireSentenceManager` 등)는 **화면 이동용**이다. 실제 권한 확인은 BE 컨트롤러와 DB RLS가 매 요청마다 한다.
 - `/api/*`는 `proxy.ts`를 거치지 않는다. BE가 직접 세션을 확인하고 401을 돌려준다.
+- API는 버전 접두사(`/api/v1`) 아래에 있다. 접두사는 `contracts/common.ts`의 `API_PREFIX` 하나로 FE·BE가 같이 쓴다. 버전 규칙은 [backend.md](backend.md#버전).
 
 ## BE를 분리할 때
 
