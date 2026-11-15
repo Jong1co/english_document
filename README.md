@@ -3,15 +3,12 @@
 영어 문장(`sentence` / `meaning` / `description`)과 출처(`sources` 1 : N `sentences`)를 수집·관리하는 어드민입니다.
 Next.js 16 + Supabase(Postgres, Auth) + Vercel.
 
-## 권한
+이 문서는 **개발 환경과 배포 설정**만 다룹니다. 구조, 규칙, 권한 같은 프로젝트 문서는 [AGENTS.md](AGENTS.md)의 목차에서 찾습니다.
 
-| 역할 | 할 수 있는 일 |
-|---|---|
-| `pending` | 가입 직후 상태. 승인 대기 화면만 볼 수 있음 |
-| `editor` | 문장·출처 관리 |
-| `admin` | 문장·출처 관리 + 회원 권한 변경 (자기 자신 제외) |
+## 필요한 것
 
-권한은 DB의 RLS가 최종적으로 막고, 서버 액션도 매번 역할을 다시 확인합니다.
+- Node.js 20 이상, pnpm 10 (`corepack enable`)
+- Docker Desktop (로컬 Supabase, DB·e2e 테스트용)
 
 ## 로컬 실행
 
@@ -40,23 +37,24 @@ pnpm dev
 update public.profiles set role = 'admin' where email = '<가입한 이메일>';
 ```
 
-## 테스트
+## 검사와 테스트
 
-| 명령 | 내용 |
-|---|---|
-| `pnpm test` | 단위 테스트 (Vitest) — 입력 검증, 검색어 처리, 역할 판정 |
-| `pnpm test:db` | DB 권한 테스트 (pgTAP) — 역할별 RLS, 가입 트리거, 출처 삭제 제한 |
-| `pnpm test:e2e` | 브라우저 테스트 (Playwright) — 로그인, 문장 관리, 회원 관리 |
+```bash
+pnpm lint        # 코드 규칙 + FE/BE·FSD 경계
+pnpm test        # 단위 테스트 (Vitest)
+pnpm build       # 타입 검사 + 프로덕션 빌드
+pnpm test:db     # DB 권한 테스트 (pgTAP) — 로컬 Supabase 필요
+pnpm test:e2e    # 브라우저 테스트 (Playwright) — 로컬 Supabase 필요
+```
 
-`test:db`와 `test:e2e`는 로컬 Supabase가 실행 중이어야 합니다.
-e2e는 `.env`의 값과 상관없이 **항상 로컬 Supabase**에 붙고, 시작할 때 로컬의 문장·출처 데이터를 지웁니다. 원격 URL이면 실행을 거부합니다.
+e2e는 `.env`의 값과 상관없이 **항상 로컬 Supabase**에 붙고, 시작할 때 로컬의 문장·출처 데이터를 지웁니다. 원격 URL이면 실행을 거부합니다. 무엇을 어디서 테스트하는지는 [docs/testing.md](docs/testing.md).
 
 스키마를 바꾼 뒤에는 타입을 다시 생성합니다.
 
 ```bash
 pnpm supabase migration new <name>   # supabase/migrations/에 SQL 작성
 pnpm supabase db reset               # 로컬에 적용
-pnpm db:types                        # lib/supabase/database.types.ts 갱신
+pnpm db:types                        # server/db/database.types.ts 갱신
 ```
 
 ## GitHub · Vercel 배포 인수인계
@@ -119,20 +117,3 @@ returning id, email, role;
 ```
 
 4. 관리자 계정으로 다시 로그인해 `/sentences`와 `/members`가 열리는지 확인합니다. 이후에는 `/members`에서 가입자를 승인합니다. Preview에서 만든 계정과 부여한 역할은 별도 운영 DB로 복사되지 않습니다.
-
-## 구조
-
-```
-proxy.ts                     세션 갱신 + 비로그인 리다이렉트 (Next 16의 middleware)
-lib/supabase/                서버 클라이언트, 세션 갱신, 생성된 DB 타입
-lib/auth/                    역할 판정, 현재 사용자(DAL)
-lib/sentences/               입력 검증, 검색, 조회
-app/(auth)/                  로그인, 가입
-app/(admin)/sentences/       문장 관리
-app/(admin)/members/         회원 관리
-supabase/migrations/         스키마 + RLS
-supabase/tests/database/     pgTAP 권한 테스트
-e2e/                         Playwright 테스트
-```
-
-`next.config.ts`에서 `cacheComponents`가 켜져 있습니다. 세션이나 DB를 읽는 컴포넌트는 반드시 `<Suspense>` 안에 두어야 하며, 그렇지 않으면 `pnpm build`가 실패합니다.
