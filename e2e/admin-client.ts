@@ -1,5 +1,5 @@
 import { createClient } from '@supabase/supabase-js'
-import type { Database } from '../lib/supabase/database.types'
+import type { Database } from '../server/db/database.types'
 import { getLocalSupabaseEnv } from './local-env'
 
 /** Service-role client for the LOCAL Supabase only (getLocalSupabaseEnv refuses remote hosts). */
