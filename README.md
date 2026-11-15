@@ -49,6 +49,8 @@ pnpm test:e2e    # 브라우저 테스트 (Playwright) — 로컬 Supabase 필�
 
 e2e는 `.env`의 값과 상관없이 **항상 로컬 Supabase**에 붙고, 시작할 때 로컬의 문장·출처 데이터를 지웁니다. 원격 URL이면 실행을 거부합니다. 무엇을 어디서 테스트하는지는 [docs/testing.md](docs/testing.md).
 
+PR과 `main` 푸시마다 GitHub Actions(`.github/workflows/ci.yml`)가 위 다섯 가지를 모두 실행합니다.
+
 스키마를 바꾼 뒤에는 타입을 다시 생성합니다.
 
 ```bash
@@ -67,7 +69,7 @@ pnpm db:types                        # server/db/database.types.ts 갱신
 2. 프레임워크는 **Next.js**, Root Directory는 저장소 루트(`.`)를 사용합니다. `pnpm-lock.yaml`과 `package.json`의 `build` 스크립트가 있으므로 설치·빌드·출력 설정은 자동 감지 기본값을 사용합니다.
 3. **Settings → Environments → Production → Branch Tracking**에서 `main`을 확인합니다. 기능 브랜치나 PR은 Preview, `main`에 병합된 커밋은 Production으로 배포됩니다. [Vercel GitHub 연동](https://vercel.com/docs/git/vercel-for-github) · [배포 브랜치 설정](https://vercel.com/docs/git#production-branch)
 
-현재 저장소에는 `.github/workflows/`가 없습니다. GitHub **Settings → Secrets and variables → Actions**에 등록할 항목은 없으며 `VERCEL_TOKEN`도 필요하지 않습니다. [.env.example](.env.example)에는 이름과 예시만 두고 실제 값은 각 환경에 입력합니다.
+`.github/workflows/ci.yml`은 PR 검사만 하고 배포하지 않습니다. CI는 러너 안에 로컬 Supabase를 띄워 쓰므로 GitHub **Settings → Secrets and variables → Actions**에 등록할 항목은 없으며 `VERCEL_TOKEN`도 필요하지 않습니다. [.env.example](.env.example)에는 이름과 예시만 두고 실제 값은 각 환경에 입력합니다.
 
 ### 2. Vercel 환경변수 입력
 

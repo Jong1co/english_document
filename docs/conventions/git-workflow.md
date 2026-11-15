@@ -69,3 +69,5 @@ Claude Code에서는 "워크트리에서 작업해줘"라고 하면 `.claude/wor
 pnpm lint && pnpm test && pnpm build
 pnpm test:db && pnpm test:e2e      # DB·인증·화면 흐름을 건드렸다면
 ```
+
+**CI(`Lint · Unit · Build`, `DB · E2E`)가 모두 통과해야 머지한다.** 로컬 확인은 푸시 전 빠른 피드백용이고, 최종 판단은 CI다. CI 구성은 [testing.md](../testing.md#ci).

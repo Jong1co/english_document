@@ -8,6 +8,17 @@
 | `pnpm test:e2e` | Playwright | 로그인, 문장 관리, 회원 관리 전체 흐름 | 로컬 Supabase (Docker) |
 | `pnpm build` | Next | 타입 검사, `<Suspense>` 누락 등 렌더링 규칙 | — |
 
+## CI
+
+`.github/workflows/ci.yml` — 모든 PR과 `main` 푸시에서 실행된다. 같은 PR에 새 커밋이 오면 이전 실행은 취소된다.
+
+| 잡 | 단계 | 비고 |
+|---|---|---|
+| `Lint · Unit · Build` | `pnpm lint` → `pnpm test` → `pnpm build` | 환경 변수 없이 빌드 (Supabase 값은 요청 시점에 읽음) |
+| `DB · E2E` | 로컬 Supabase 시작 → `pnpm test:db` → `pnpm test:e2e` | 러너 안의 Docker에 Postgres·Auth·REST·Kong만 띄움. 실패 시 Playwright trace를 아티팩트로 7일 보관 |
+
+시크릿은 필요 없다. 두 잡 모두 통과해야 머지한다 ([git-workflow.md](conventions/git-workflow.md#pr)).
+
 ## 어디에 무엇을 테스트하나
 
 | 위치 | 테스트 |
